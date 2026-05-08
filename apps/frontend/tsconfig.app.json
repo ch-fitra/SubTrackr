@@ -19,7 +19,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    /* Path mapping to resolve monorepo type conflicts */
+    "paths": {
+      "react": ["../../node_modules/@types/react"]
+    }
   },
   "include": ["src"]
 }

@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String
+  password      String
+  timezone      String         @default("Asia/Jakarta")
+  currency      String         @default("IDR")
+  pushEndpoint  String?
+  pushAuth      String?
+  pushP256dh    String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id              String          @id @default(cuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  description     String?
+  category        Category        @default(OTHER)
+  logoUrl         String?
+  cost            Decimal         @db.Decimal(10, 2)
+  currency        String          @default("IDR")
+  billingCycle    BillingCycle    @default(MONTHLY)
+  nextBillingDate DateTime
+  startDate       DateTime        @default(now())
+  status          Status          @default(ACTIVE)
+  website         String?
+  notes           String?
+  color           String          @default("#6366f1")
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  reminders       Reminder[]
+  paymentHistory  PaymentHistory[]
+}
+
+model Reminder {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  daysBefore     Int          @default(3)
+  channel        Channel      @default(EMAIL)
+  isActive       Boolean      @default(true)
+  lastNotifiedAt DateTime?
+  createdAt      DateTime     @default(now())
+}
+
+model PaymentHistory {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  amount         Decimal      @db.Decimal(10, 2)
+  currency       String
+  paidDate       DateTime
+  status         PayStatus    @default(PAID)
+  notes          String?
+  createdAt      DateTime     @default(now())
+}
+
+enum Category {
+  STREAMING
+  MUSIC
+  SOFTWARE
+  PRODUCTIVITY
+  GAMING
+  CLOUD
+  FITNESS
+  NEWS
+  FINANCE
+  OTHER
+}
+
+enum BillingCycle {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum Status {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+enum Channel {
+  EMAIL
+  PUSH
+  BOTH
+}
+
+enum PayStatus {
+  PAID
+  MISSED
+  PENDING
+}
